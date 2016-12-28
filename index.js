@@ -1,9 +1,17 @@
 var fs = require('fs');
 var exec = require('child_process').exec;
-var cores = require('os').cpus().length;
-var file = process.argv[2]; // or stdin, eventually
+var args = require('minimist')(process.argv.slice(2));
+var cores = args.c || args.C || args.cores || require('os').cpus().length || 1;
+var file = args._[0]; // or stdin, eventually
 var node = process.argv[0];
 var child_script = './child.js'; // configurable or some small subset, eventually
+
+if (!args._.length || args.help) {
+    var help = ['• must specify a line-delimited file',
+    JSON.stringify(args, null, 2)
+    ].join('\n');
+    return console.log(help);
+}
 
 var stats = fs.statSync(file);
 var chunkSize = stats.size/cores;
