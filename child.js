@@ -16,34 +16,38 @@ function setVars() {
 var env = setVars();
 if (!env) throw new Error('missing env vars');
 
-var count = {
-    success: 0,
-    error: 0
-};
+var bytes = -1;
+var readLimit = env.readEnd - env.readStart;
+var reading = true;
 
-// we need to leave `end` off and stop reading ourselves gracefully
-// in order to always close on actual lines and not midway through one
-    // which we're totally doing right now
+var readStream = fs.createReadStream(env.file, {
+    start: env.readStart
+});
 
-fs.createReadStream(env.file, {
-    start: env.readStart,
-    end: env.readEnd
-})
-.pipe(split())
+readStream.pipe(split('\n'))
 .on('data', function (data) {
-    var error = false;
-    try {
-        JSON.parse(data);
-        // do the busy work here
-    } catch (e) {
-        error = true;
-    }
+    if (!reading) return;
+    bytes += data.length + 1; // + 1 for the newline that was stripped
 
-    if (error) {
-        count.error++;
+    if (bytes < readLimit) {
+        data = data.toString();
+        var validBegin = data[0] === '{';
+        // because we start reading at an arbitrary point in the file there's no guarantee
+        // we get clean line breaks, so we check and process lines with a known good first char
+        if (validBegin) processLine(data);
     } else {
-        count.success++;
+        // flush the current line
+        processLine(data.toString());
+        reading = false;
+        this.end();
     }
 }).on('end', function () {
-    console.log(JSON.stringify(count));
+    readStream.destroy();
+    console.log(count);
 });
+
+var count = 0;
+
+function processLine(line) {
+    count++;
+}

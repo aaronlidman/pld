@@ -8,7 +8,7 @@ var childScript = './child.js'; // configurable or some small subset, eventually
 
 if (!args._.length || args.help) {
     var help = [
-        '• must specify a line-delimited file',
+        ' • must specify a line-delimited file',
         JSON.stringify(args, null, 2)
     ].join('\n');
     return console.log(help);
@@ -32,6 +32,6 @@ for (var i = 1; i <= cores; i++) {
 
     exec(command, options, function (err, stdout) {
         if (err) return console.log(err);
-        console.log(stdout);
+        if (stdout) console.log(stdout);
     });
 }
