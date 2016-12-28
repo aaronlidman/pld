@@ -4,18 +4,19 @@ var args = require('minimist')(process.argv.slice(2));
 var cores = args.c || args.C || args.cores || require('os').cpus().length || 1;
 var file = args._[0]; // or stdin, eventually
 var node = process.argv[0];
-var child_script = './child.js'; // configurable or some small subset, eventually
+var childScript = './child.js'; // configurable or some small subset, eventually
 
 if (!args._.length || args.help) {
-    var help = ['• must specify a line-delimited file',
-    JSON.stringify(args, null, 2)
+    var help = [
+        '• must specify a line-delimited file',
+        JSON.stringify(args, null, 2)
     ].join('\n');
     return console.log(help);
 }
 
 var stats = fs.statSync(file);
-var chunkSize = stats.size/cores;
-var command = [node, child_script].join(' ');
+var chunkSize = stats.size / cores;
+var command = [node, childScript].join(' ');
 
 for (var i = 1; i <= cores; i++) {
     var beginning = Math.ceil(chunkSize * (i - 1));
@@ -24,12 +25,12 @@ for (var i = 1; i <= cores; i++) {
     var options = {
         env: {
             file: file,
-            read_start: beginning,
-            read_end: end
+            readStart: beginning,
+            readEnd: end
         }
     };
 
-    exec(command, options, function(err, stdout, stderr) {
+    exec(command, options, function (err, stdout) {
         if (err) return console.log(err);
         console.log(stdout);
     });

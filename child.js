@@ -1,22 +1,20 @@
 var fs = require('fs');
 var split = require('binary-split');
 
-function setVars(obj) {
-    if (!process.env.file) return false;
-    if (!process.env.read_start) return false;
-    if (!process.env.read_end) return false;
+function setVars() {
+    if (!process.env.file) throw new Error('missing file env var');
+    if (!process.env.readStart) throw new Error('missing readStart env var');
+    if (!process.env.readEnd) throw new Error('missing readEnd env var');
 
-    var clean = {
+    return {
         file: process.env.file,
-        read_start: parseInt(process.env.read_start),
-        read_end: parseInt(process.env.read_end)
+        readStart: parseInt(process.env.readStart),
+        readEnd: parseInt(process.env.readEnd)
     };
-
-    return clean;
 }
 
-var env = setVars(process.env);
-if (!env) process.exit(1);
+var env = setVars();
+if (!env) throw new Error('missing env vars');
 
 var count = {
     success: 0,
@@ -28,16 +26,16 @@ var count = {
     // which we're totally doing right now
 
 fs.createReadStream(env.file, {
-    start: env.read_start,
-    end: env.read_end
+    start: env.readStart,
+    end: env.readEnd
 })
 .pipe(split())
-.on('data', function(data) {
+.on('data', function (data) {
     var error = false;
     try {
-        data = JSON.parse(data);
+        JSON.parse(data);
         // do the busy work here
-    } catch(e) {
+    } catch (e) {
         error = true;
     }
 
@@ -46,6 +44,6 @@ fs.createReadStream(env.file, {
     } else {
         count.success++;
     }
-}).on('end', function() {
+}).on('end', function () {
     console.log(JSON.stringify(count));
 });

@@ -4,11 +4,29 @@
   "description": "Parallelizing line-delimited work",
   "main": "index.js",
   "scripts": {
+    "lint": "eslint *.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "binary-split": "^1.0.3"
+    "binary-split": "^1.0.3",
+    "minimist": "^1.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.12.2",
+    "eslint-config-mourner": "^2.0.1"
+  },
+  "eslintConfig": {
+    "extends": "mourner",
+    "rules": {
+      "strict": 0,
+      "quotes": 0,
+      "indent": 2,
+      "global-require": 0,
+      "consistent-return": 0,
+      "space-before-blocks": 1,
+      "space-before-function-paren": 1
+    }
   }
 }
